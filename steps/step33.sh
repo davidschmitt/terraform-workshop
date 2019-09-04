@@ -1,4 +1,7 @@
 #
-# Now that this workshop is done clean up after ourselves and destroy all the resources
+# As a review, here are the files we created.
 #
-terraform destroy -auto-approve
+# The terraform.tfstate* files are where Terraform tracks internal state so you should never
+# modify or remove those files while you have active resources.
+#
+ls -lR

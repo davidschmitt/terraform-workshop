@@ -12,10 +12,10 @@ echo '
     }
   }
   module az_2 {
-    source                    = "./vpc"
+    source                    = "./az"
     tags                      = var.tags
     az_name                   = "${var.region_2}b"
-    vpc_id                    = module.vpc_2.id
+    vpc_id                    = module.vpc_2.vpc_id
     public_route_table_id     = module.vpc_2.public_route_table_id
     default_security_group_id = module.vpc_2.default_security_group_id
     providers                 = {

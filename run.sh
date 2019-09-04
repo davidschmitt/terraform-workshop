@@ -1,33 +1,49 @@
 #!/bin/bash
 
+################################################################################
+# Informational message (in green)
+################################################################################
 info() {
   echo
   tput setaf 2
   echo "$*"
   tput setaf 7
-  echo
 }
 
+################################################################################
+# Warning message (in red)
+################################################################################
+warn() {
+  echo
+  tput setaf 1
+  echo "$@"
+  tput setaf 7
+}
+
+################################################################################
+# Make sure previous command succeeded
+################################################################################
 ok() {
   if [ "$?" = "0" ]
   then
     info "$1 succeeded"
   else
-    echo >&2
-    echo "$1 failed" >&2
+    warn "$1 failed"
     exit 1
   fi
 }
 
+################################################################################
+# Prompt the user for input before proceeding
+################################################################################
 prompt() {
-  echo
-  tput setaf 1
-  echo -n "[$*]: "
-  tput setaf 7
+  warn -n "[$*]: "
   read ANS
-  echo
 }
 
+################################################################################
+# Generate markdown from a single step
+################################################################################
 markdown() {
   echo -n "$1. "
   sed -ne 's/^# //p' <"steps/step$1.sh"
@@ -39,6 +55,9 @@ markdown() {
   echo
 }
 
+################################################################################
+# Generate markdown from all steps (to generate much of the README.md)
+################################################################################
 allMarkdown() {
   STEP=1
   while [ -f "steps/step$STEP.sh" ]
@@ -48,6 +67,9 @@ allMarkdown() {
   done
 }
 
+################################################################################
+# Parse the command line options
+################################################################################
 STEP=1
 while getopts "s:m" OPT
 do
@@ -66,9 +88,15 @@ do
   esac
 done
 
-WORKDIR="`pwd`/work2"
+################################################################################
+# Begin the actual steps here
+################################################################################
+WORKDIR="`pwd`/tmp"
 STEPDIR=`pwd`/steps
 
+################################################################################
+# Abort if they passed in a garbage step
+################################################################################
 STEPFILE="$STEPDIR/step$STEP.sh"
 if [ '!' -f "$STEPFILE" ]
 then
@@ -76,6 +104,9 @@ then
   exit 1
 fi
 
+################################################################################
+# Try to clean up if it has been run before
+################################################################################
 if [ "$STEP" = "1" ]
 then
   clear
@@ -88,29 +119,34 @@ then
   rm -rf "$WORKDIR/"*.tf "$WORKDIR/"*.tfvars "$WORKDIR/az" "$WORKDIR/vpc"
 fi
 
+################################################################################
+# Create the working directory
+################################################################################
 mkdir -p "$WORKDIR" &&
   cd "$WORKDIR" || (echo "Unable to cd to $WORKDIR"; exit 1)
 
+################################################################################
+# Loop through the remaining steps
+################################################################################
 while true
 do
   clear
   info "Step $STEP (working dir $WORKDIR)"
 
   tput setaf 6
+  echo
   grep '^#' <"$STEPFILE"
-  echo
   tput setaf 3
-  grep -v '^#' <"$STEPFILE"
   echo
-  tput setaf 7
+  grep -v '^#' <"$STEPFILE"
 
   prompt "Press ENTER to execute step $STEP"
-  bash "$STEPFILE"
-  OK="$?"
-  test "$OK" = "0"
-  ok "Step $STEP"
-  (( ++STEP ))
+
   echo
+  bash "$STEPFILE"
+  ok "Step $STEP"
+
+  (( ++STEP ))
 
   STEPFILE="$STEPDIR/step$STEP.sh"
   if [ -f "$STEPFILE" ]

@@ -1,4 +1,4 @@
 #
-# See what will happen when we apply this configuration
+# Since we added two new child modules we must run init again
 #
-terraform plan
+terraform init

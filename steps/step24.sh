@@ -12,6 +12,6 @@ echo '
   resource aws_route private {
     destination_cidr_block  = "0.0.0.0/0"
     route_table_id          = aws_route_table.private.id
-    instance_id             = aws_instance.nat
+    instance_id             = aws_instance.nat.id
   }
 ' >>az/resources.tf
