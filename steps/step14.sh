@@ -1,27 +1,18 @@
 #
-# Append a default security group for our VPC to keep this workshop simple
+# We will need some of the VPC resource information to create subnets later.
+# Define the outputs so they will be available when we need them
 #
 echo '
-  resource aws_security_group default {
-    name = "workshop-default-security-group"
-    vpc_id = aws_vpc.vpc.id
-    egress {
-      from_port       = 0
-      to_port         = 0
-      protocol        = "-1"
-      cidr_blocks     = ["0.0.0.0/0"]
-    }
-    ingress {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = [ "0.0.0.0/0" ]
-    }
-    egress {
-      from_port       = 0
-      to_port         = 0
-      protocol        = "-1"
-      cidr_blocks     = [ "${var.cidr_block}" ]
-    }
+  output vpc_id {
+    value = aws_vpc.vpc.id
   }
-' >>vpc/resources.tf
+  output igw_id {
+    value = aws_internet_gateway.igw.id
+  }
+  output public_route_table_id {
+    value = aws_route_table.public.id
+  }
+  output default_security_group_id {
+    value = aws_security_group.default.id
+  }
+' >vpc/outputs.tf

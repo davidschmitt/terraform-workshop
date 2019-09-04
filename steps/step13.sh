@@ -1,22 +1,27 @@
 #
-# Append gateway and routing resources so we can talk to the Internet
+# Append a default security group for our VPC to keep this workshop simple
 #
 echo '
-  resource aws_internet_gateway igw {
+  resource aws_security_group default {
+    name = "workshop-default-security-group"
     vpc_id = aws_vpc.vpc.id
-    tags = merge(var.tags, {
-      Name = "workshop-internet-gateway"
-    })
-  }
-  resource aws_route_table public {
-    vpc_id = aws_vpc.vpc.id
-    tags = merge(var.tags, {
-      Name = "workshop-public-route-table"
-    })
-  }
-  resource aws_route default {
-    route_table_id = aws_route_table.public.id
-    destination_cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    egress {
+      from_port       = 0
+      to_port         = 0
+      protocol        = "-1"
+      cidr_blocks     = ["0.0.0.0/0"]
+    }
+    ingress {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [ "0.0.0.0/0" ]
+    }
+    egress {
+      from_port       = 0
+      to_port         = 0
+      protocol        = "-1"
+      cidr_blocks     = [ "${var.cidr_block}" ]
+    }
   }
 ' >>vpc/resources.tf

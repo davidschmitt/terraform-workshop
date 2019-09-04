@@ -1,4 +1,9 @@
 #
-# Go ahead and create the NAT and private subnet
+# Add the second provider alias to the root module
 #
-terraform apply -auto-approve
+echo '
+  provider aws {
+    region  = var.region_2
+    alias   = "aws_2"
+  }
+' >>providers.tf

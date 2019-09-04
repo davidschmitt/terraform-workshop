@@ -1,4 +1,7 @@
 #
-# See what will happen when we apply this configuration
+# Add the second VPC values to the terraform.tfvars file
 #
-terraform plan
+echo '
+  cidr_block_2  = "10.2.0.0/16"
+  region_2      = "us-east-1"
+' >>terraform.tfvars

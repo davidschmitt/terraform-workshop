@@ -1,18 +1,13 @@
 #
-# Define the private subnet
+# Define extra variables in the root module for our second VPC
 #
 echo '
-  resource aws_subnet private {
-    vpc_id            = var.vpc_id
-    availability_zone = var.az_name
-    cidr_block        = cidrsubnet(local.cidr_block, 4, local.offset * 2 + 1)
-    depends_on        = [ aws_instance.nat ]
-    tags              = merge(var.tags, {
-      Name = "workshop-${var.az_name}-private-subnet"
-    })
+  variable region_2 {
+    type        = string
+    description = "The AWS region of the second VPC"
   }
-  resource aws_route_table_association private_nat_rt_assoc {
-    subnet_id       = aws_subnet.private.id
-    route_table_id  = aws_route_table.private.id
+  variable cidr_block_2 {
+    type        = string
+    description = "The CIDR block of the second VPC"
   }
-' >>az/resources.tf
+' >>vars.tf

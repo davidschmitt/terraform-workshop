@@ -1,22 +1,16 @@
 #
-# Define local values to calculate an az_name offset.
-# That offset will be used to automatically calculate
-# subnet CIDR blocks.
+# Add the az child module to our root module
 #
 echo '
-  locals {
-    region = data.aws_region.current.name
-    azs = [
-      "${local.region}a",
-      "${local.region}b",
-      "${local.region}c",
-      "${local.region}d",
-      "${local.region}e",
-      "${local.region}f",
-      "${local.region}g",
-      "${local.region}h"
-    ]
-    offset = index(local.azs, var.az_name)
-    cidr_block = data.aws_vpc.current.cidr_block
+  module az_1 {
+    source                    = "./vpc"
+    tags                      = var.tags
+    az_name                   = "${var.region_1}a"
+    vpc_id                    = module.vpc_1.id
+    public_route_table_id     = module.vpc_1.public_route_table_id
+    default_security_group_id = module.vpc_1.default_security_group_id
+    providers                 = {
+      aws = aws.aws_1
+    }
   }
-' >az/locals.tf
+' >>modules.tf

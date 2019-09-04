@@ -1,9 +1,4 @@
 #
-# Add the second provider alias to the root module
+# Actually create the second VPC and AZ
 #
-echo '
-  provider aws {
-    region  = var.region_2
-    alias   = "aws_2"
-  }
-' >>providers.tf
+terraform apply -auto-approve

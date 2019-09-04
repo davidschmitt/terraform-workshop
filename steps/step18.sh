@@ -1,25 +1,22 @@
 #
-# Now we'll create an availability zone child module and define the variables it will need
+# Define local values to calculate an az_name offset.
+# That offset will be used to automatically calculate
+# subnet CIDR blocks.
 #
-mkdir -p az && echo '
-  variable tags {
-    description = "General tags to assign to all resources"
-    type = map(string)
+echo '
+  locals {
+    region = data.aws_region.current.name
+    azs = [
+      "${local.region}a",
+      "${local.region}b",
+      "${local.region}c",
+      "${local.region}d",
+      "${local.region}e",
+      "${local.region}f",
+      "${local.region}g",
+      "${local.region}h"
+    ]
+    offset = index(local.azs, var.az_name)
+    cidr_block = data.aws_vpc.current.cidr_block
   }
-  variable az_name {
-    description = "Availability Zone Name"
-    type = string
-  }
-  variable vpc_id {
-    description = "VPC ID"
-    type = string
-  }
-  variable public_route_table_id {
-    description = "Public route table ID"
-    type = string
-  }
-  variable default_security_group_id {
-    description = "Default Security Group ID"
-    type = string
-  }
-' >az/vars.tf
+' >az/locals.tf

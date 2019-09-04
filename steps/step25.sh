@@ -1,16 +1,18 @@
 #
-# We will need a NAT instance for our private subnet
+# Define the private subnet
 #
 echo '
-  resource aws_instance nat {
-    ami                         = data.aws_ami.nat_ami.id
-    instance_type               = "t2.nano"
-    subnet_id                   = aws_subnet.public.id
-    associate_public_ip_address = true
-    vpc_security_group_ids      = [ var.default_security_group_id ]
-    source_dest_check           = false
-    tags                        = merge(var.tags, { 
-      Name = "workshop-${var.az_name}-nat"
+  resource aws_subnet private {
+    vpc_id            = var.vpc_id
+    availability_zone = var.az_name
+    cidr_block        = cidrsubnet(local.cidr_block, 4, local.offset * 2 + 1)
+    depends_on        = [ aws_instance.nat ]
+    tags              = merge(var.tags, {
+      Name = "workshop-${var.az_name}-private-subnet"
     })
+  }
+  resource aws_route_table_association private_nat_rt_assoc {
+    subnet_id       = aws_subnet.private.id
+    route_table_id  = aws_route_table.private.id
   }
 ' >>az/resources.tf
