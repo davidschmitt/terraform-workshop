@@ -3,7 +3,7 @@
 # Notice that the region is implied by the aws provider we pass
 #
 echo '
-  module vpc1 {
+  module vpc_1 {
     source      = "./vpc"
     tags        = var.tags
     cidr_block  = var.cidr_block_1
