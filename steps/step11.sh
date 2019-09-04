@@ -1,5 +1,5 @@
 #
-# Actually apply the configuration to create an empty VPC
-# The -auto-approve flag avoids the need for you to type 'yes<ENTER>'
+# Here is an overview of the files we created so far.  They will remain after the workshop in case
+# you want to review them.
 #
-terraform apply -auto-approve
+ls -lR

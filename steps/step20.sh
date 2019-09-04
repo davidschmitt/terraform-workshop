@@ -1,16 +1,18 @@
 #
-# Add the az child module to our root module
+# Add a public subnet resource.  We use the offset to calculate CIDR blocks
+# that we know won't overlap.
 #
 echo '
-  module az_1 {
-    source                    = "./az"
-    tags                      = var.tags
-    az_name                   = "${var.region_1}a"
-    vpc_id                    = module.vpc_1.vpc_id
-    public_route_table_id     = module.vpc_1.public_route_table_id
-    default_security_group_id = module.vpc_1.default_security_group_id
-    providers                 = {
-      aws = aws.aws_1
-    }
+  resource aws_subnet public {
+    availability_zone = var.az_name
+    cidr_block        = cidrsubnet(local.cidr_block, 4, local.offset * 2)
+    vpc_id            = var.vpc_id
+    tags              = merge(var.tags, {
+      Name = "workshop-${var.az_name}-public-subnet"
+    })
   }
-' >>modules.tf
+  resource aws_route_table_association public {
+    subnet_id       = aws_subnet.public.id
+    route_table_id  = var.public_route_table_id
+  }
+' >>az/resources.tf

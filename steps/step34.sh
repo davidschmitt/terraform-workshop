@@ -1,25 +1,20 @@
 #
-# We want to peer our two VPCs.  Here we create a new child module for peering and describe its variables
+# In order to employ the subnets from the AZs we need to export their ID values from the child module.
+# We also need the private route table for VPC peering.
+# We export the NAT ami ID to use for a bastion host and internal server later on (even though
+# they won't be actual NAT instances)
 #
-mkdir -p ./peering && echo '
-  variable requester_id {
-    type = string
-    description = "The id of the requester vpc"
+echo '
+  output public_subnet_id {
+    value = aws_subnet.public.id
   }
-  variable requester_route_table_ids {
-    type = list(string)
-    description = "A list of route table ids to which the accepter CIDR block should be added"
+  output private_subnet_id {
+    value = aws_subnet.private.id
   }
-  variable accepter_id {
-    type = string
-    description = "The id of the accepter vpc"
+  output private_route_table_id {
+    value = aws_route_table.private.id
   }
-  variable accepter_route_table_ids {
-    type = list(string)
-    description = "A list of peer route table ids to which the requester CIDR block should be added"
+  output nat_ami_id {
+    value = data.aws_ami.nat_ami.id
   }
-  variable tags {
-    type = map(string)
-    description = "General tags to apply to all resources"
-  }
-' >peering/vars.tf
+' >az/outputs.tf

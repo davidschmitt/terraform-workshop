@@ -1,23 +1,20 @@
 #
-# In the root module, use the peering sub-module to actually establish peering
+# Add routes between the peered VPCs
+# Notice how we use the count mechanism to create more than one route at a time
 #
 echo '
-  module peering_1_2 {
-    source                    = "./peering"
-    tags                      = var.tags
-    requester_id              = module.vpc_1.vpc_id
-    accepter_id               = module.vpc_2.vpc_id
-    requester_route_table_ids = [ 
-      module.vpc_1.public_route_table_id,
-      module.az_1.private_route_table_id
-    ]
-    accepter_route_table_ids  = [
-      module.vpc_2.public_route_table_id,
-      module.az_2.private_route_table_id
-    ]
-    providers                 = {
-      aws.requester = aws.aws_1
-      aws.accepter = aws.aws_2
-    }
+  resource aws_route vpc_routes {
+    count = length(var.requester_route_table_ids)
+    provider = aws.requester
+    route_table_id = var.requester_route_table_ids[count.index]
+    destination_cidr_block = data.aws_vpc.accepter.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
   }
-' >>modules.tf
+  resource aws_route peer_routes {
+    count = length(var.accepter_route_table_ids)
+    provider = aws.accepter
+    route_table_id = var.accepter_route_table_ids[count.index]
+    destination_cidr_block = data.aws_vpc.requester.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
+  }
+' >>peering/resources.tf

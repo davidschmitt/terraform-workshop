@@ -1,9 +1,7 @@
 #
-# Add the second provider alias to the root module
+# Add the second VPC values to the terraform.tfvars file
 #
 echo '
-  provider aws {
-    region  = var.region_2
-    alias   = "aws_2"
-  }
-' >>providers.tf
+  cidr_block_2  = "10.2.0.0/16"
+  region_2      = "us-east-1"
+' >>terraform.tfvars

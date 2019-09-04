@@ -1,17 +1,18 @@
 #
-# Since we have peered the VPCs we can access this internal server
-# via the bastion in the other VPC
+# The EC2 resources here are not re-usable, so we just put them in the root module
+# We could use count here if we wanted a separate bastion for each VPC
 #
 echo '
-  resource aws_instance server {
-    provider                    = aws.aws_2
+  resource aws_instance bastion {
+    provider                    = aws.aws_1
+    associate_public_ip_address = true
     instance_type               = "t2.nano"
     key_name                    = var.key_pair
-    ami                         = module.az_2.nat_ami_id
-    subnet_id                   = module.az_2.private_subnet_id
-    vpc_security_group_ids      = [ module.vpc_2.default_security_group_id ]
+    ami                         = module.az_1.nat_ami_id
+    subnet_id                   = module.az_1.public_subnet_id
+    vpc_security_group_ids      = [ module.vpc_1.default_security_group_id ]
     tags = merge(var.tags, { 
-      Name = "workshop-server"
+      Name = "workshop-bastion"
     })
   }
-' >>resources.tf
+' >resources.tf

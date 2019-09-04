@@ -1,18 +1,22 @@
 #
-# Add a public subnet resource.  We use the offset to calculate CIDR blocks
-# that we know won't overlap.
+# Define local values to calculate an az_name offset.
+# That offset will be used to automatically calculate
+# subnet CIDR blocks.
 #
 echo '
-  resource aws_subnet public {
-    availability_zone = var.az_name
-    cidr_block        = cidrsubnet(local.cidr_block, 4, local.offset * 2)
-    vpc_id            = var.vpc_id
-    tags              = merge(var.tags, {
-      Name = "workshop-${var.az_name}-public-subnet"
-    })
+  locals {
+    region = data.aws_region.current.name
+    azs = [
+      "${local.region}a",
+      "${local.region}b",
+      "${local.region}c",
+      "${local.region}d",
+      "${local.region}e",
+      "${local.region}f",
+      "${local.region}g",
+      "${local.region}h"
+    ]
+    offset = index(local.azs, var.az_name)
+    cidr_block = data.aws_vpc.current.cidr_block
   }
-  resource aws_route_table_association public {
-    subnet_id       = aws_subnet.public.id
-    route_table_id  = var.public_route_table_id
-  }
-' >>az/resources.tf
+' >az/locals.tf

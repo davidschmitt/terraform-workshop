@@ -1,4 +1,4 @@
 #
-# Actually create the second VPC and AZ
+# Since we added two new child modules we must run init again
 #
-terraform apply -auto-approve
+terraform init

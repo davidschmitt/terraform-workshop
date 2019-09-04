@@ -1,8 +1,9 @@
 #
-# Enter the name of the key pair you want to use (we can't provide it to you)
+# We want to attach a key pair so that you can test connectivity to the bastion host and internal server
 #
-echo -n "Please enter the name of the key pair you wish to use: " &&
-read KEY_PAIR &&
-echo "
-  key_pair      = \"$KEY_PAIR\"
-" >>terraform.tfvars
+echo '
+  variable key_pair {
+    type = string
+    description = "The name of a key pair to attach to a bastion host and internal server for testing purposes"
+  }
+' >>vars.tf

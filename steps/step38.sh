@@ -1,20 +1,24 @@
 #
-# Add routes between the peered VPCs
-# Notice how we use the count mechanism to create more than one route at a time
+# Now we can declare the actual peering
 #
 echo '
-  resource aws_route vpc_routes {
-    count = length(var.requester_route_table_ids)
+  resource aws_vpc_peering_connection requester {
     provider = aws.requester
-    route_table_id = var.requester_route_table_ids[count.index]
-    destination_cidr_block = data.aws_vpc.accepter.cidr_block
-    vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
+    vpc_id = var.requester_id
+    peer_vpc_id = var.accepter_id
+    peer_region = data.aws_region.accepter.name
+    peer_owner_id = data.aws_caller_identity.accepter.account_id
+    auto_accept = false
+    tags = merge(var.tags, { 
+      Name = "workshop-peering"
+    })
   }
-  resource aws_route peer_routes {
-    count = length(var.accepter_route_table_ids)
+  resource aws_vpc_peering_connection_accepter accepter {
     provider = aws.accepter
-    route_table_id = var.accepter_route_table_ids[count.index]
-    destination_cidr_block = data.aws_vpc.requester.cidr_block
     vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
+    auto_accept = true
+    tags = merge(var.tags, { 
+      Name = "workshop-peering"
+    })
   }
-' >>peering/resources.tf
+' >peering/resources.tf

@@ -1,24 +1,20 @@
 #
-# Now we can declare the actual peering
+# Use provider data sources to find extra info for peering.
+# Notice that we use the two separate AWS providers - one for each VPC
 #
 echo '
-  resource aws_vpc_peering_connection requester {
+  data aws_vpc requester {
     provider = aws.requester
-    vpc_id = var.requester_id
-    peer_vpc_id = var.accepter_id
-    peer_region = data.aws_region.accepter.name
-    peer_owner_id = data.aws_caller_identity.accepter.account_id
-    auto_accept = false
-    tags = merge(var.tags, { 
-      Name = "workshop-peering"
-    })
+    id = var.requester_id
   }
-  resource aws_vpc_peering_connection_accepter accepter {
+  data aws_vpc accepter {
     provider = aws.accepter
-    vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
-    auto_accept = true
-    tags = merge(var.tags, { 
-      Name = "workshop-peering"
-    })
+    id = var.accepter_id
   }
-' >peering/resources.tf
+  data aws_region accepter {
+    provider = aws.accepter
+  }
+  data aws_caller_identity accepter {
+    provider = aws.accepter
+  }
+' >peering/data.tf

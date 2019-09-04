@@ -1,18 +1,25 @@
 #
-# In order to avoid extra variables for the user to populate 
-# we use the AWS provider data sources to find values for us
+# Now we'll create an availability zone child module and define the variables it will need
 #
-echo '
-  data aws_region current { }
-  data aws_vpc current {
-    id = var.vpc_id
+mkdir -p az && echo '
+  variable tags {
+    description = "General tags to assign to all resources"
+    type = map(string)
   }
-  data aws_ami nat_ami {
-    most_recent = true
-    owners = ["amazon"]
-    filter {
-      name   = "name"
-      values = ["amzn-ami-vpc-nat-hvm-*-x86_64-ebs"]
-    }
+  variable az_name {
+    description = "Availability Zone Name"
+    type = string
   }
-' >az/data.tf
+  variable vpc_id {
+    description = "VPC ID"
+    type = string
+  }
+  variable public_route_table_id {
+    description = "Public route table ID"
+    type = string
+  }
+  variable default_security_group_id {
+    description = "Default Security Group ID"
+    type = string
+  }
+' >az/vars.tf
