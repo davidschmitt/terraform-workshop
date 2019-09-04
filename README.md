@@ -126,14 +126,21 @@ $ terraform init
 $ terraform validate
 ```
 
-11. Actually apply the configuration to create an empty VPC
+11. Here is an overview of the files we created so far.  They will remain after the workshop in case
+you want to review them.
+
+```
+$ ls -lR
+```
+
+12. Actually apply the configuration to create an empty VPC
 The -auto-approve flag avoids the need for you to type 'yes<ENTER>'
 
 ```
 $ terraform apply -auto-approve
 ```
 
-12. Append gateway and routing resources so we can talk to the Internet
+13. Append gateway and routing resources so we can talk to the Internet
 
 ```
 $ echo '
@@ -157,7 +164,7 @@ $ echo '
 ' >>vpc/resources.tf
 ```
 
-13. Append a default security group for our VPC to keep this workshop simple
+14. Append a default security group for our VPC to keep this workshop simple
 
 ```
 $ echo '
@@ -186,7 +193,7 @@ $ echo '
 ' >>vpc/resources.tf
 ```
 
-14. We will need some of the VPC resource information to create subnets later.
+15. We will need some of the VPC resource information to create subnets later.
 Define the outputs so they will be available when we need them
 
 ```
@@ -203,13 +210,13 @@ $ echo '
 ' >vpc/outputs.tf
 ```
 
-15. Go ahead and apply the changes
+16. Go ahead and apply the changes
 
 ```
 $ terraform apply -auto-approve
 ```
 
-16. Now we'll create an availability zone child module and define the variables it will need
+17. Now we'll create an availability zone child module and define the variables it will need
 
 ```
 $ mkdir -p az && echo '
@@ -236,7 +243,7 @@ $ mkdir -p az && echo '
 ' >az/vars.tf
 ```
 
-17. In order to avoid extra variables for the user to populate 
+18. In order to avoid extra variables for the user to populate 
 we use the AWS provider data sources to find values for us
 
 ```
@@ -256,7 +263,7 @@ $ echo '
 ' >az/data.tf
 ```
 
-18. Define local values to calculate an az_name offset.
+19. Define local values to calculate an az_name offset.
 That offset will be used to automatically calculate
 subnet CIDR blocks.
 
@@ -280,7 +287,7 @@ $ echo '
 ' >az/locals.tf
 ```
 
-19. Add a public subnet resource.  We use the offset to calculate CIDR blocks
+20. Add a public subnet resource.  We use the offset to calculate CIDR blocks
 that we know won't overlap.
 
 ```
@@ -300,7 +307,7 @@ $ echo '
 ' >>az/resources.tf
 ```
 
-20. Add the az child module to our root module
+21. Add the az child module to our root module
 
 ```
 $ echo '
@@ -318,19 +325,19 @@ $ echo '
 ' >>modules.tf
 ```
 
-21. Since we have added a new child module we must re-run terraform init
+22. Since we have added a new child module we must re-run terraform init
 
 ```
 $ terraform init
 ```
 
-22. Go ahead and create the public subnet
+23. Go ahead and create the public subnet
 
 ```
 $ terraform apply -auto-approve
 ```
 
-23. We will need a NAT instance for our private subnet
+24. We will need a NAT instance for our private subnet
 
 ```
 $ echo '
@@ -348,7 +355,7 @@ $ echo '
 ' >>az/resources.tf
 ```
 
-24. Define a route table for the private subnet to use
+25. Define a route table for the private subnet to use
 with a default route via the NAT instance
 
 ```
@@ -367,7 +374,7 @@ $ echo '
 ' >>az/resources.tf
 ```
 
-25. Define the private subnet
+26. Define the private subnet
 
 ```
 $ echo '
@@ -387,13 +394,13 @@ $ echo '
 ' >>az/resources.tf
 ```
 
-26. Go ahead and create the NAT and private subnet
+27. Go ahead and create the NAT and private subnet
 
 ```
 $ terraform apply -auto-approve
 ```
 
-27. Define extra variables in the root module for our second VPC
+28. Define extra variables in the root module for our second VPC
 
 ```
 $ echo '
@@ -408,7 +415,7 @@ $ echo '
 ' >>vars.tf
 ```
 
-28. Add the second VPC values to the terraform.tfvars file
+29. Add the second VPC values to the terraform.tfvars file
 
 ```
 $ echo '
@@ -417,7 +424,7 @@ $ echo '
 ' >>terraform.tfvars
 ```
 
-29. Add the second provider alias to the root module
+30. Add the second provider alias to the root module
 
 ```
 $ echo '
@@ -428,7 +435,7 @@ $ echo '
 ' >>providers.tf
 ```
 
-30. Add the second VPC and second AZ to the root module.
+31. Add the second VPC and second AZ to the root module.
 Notice how easy it is since child modules are reusable.
 
 ```
@@ -455,19 +462,256 @@ $ echo '
 ' >>modules.tf
 ```
 
-31. Since we added two new child modules we must run init again
+32. Since we added two new child modules we must run init again
 
 ```
 $ terraform init
 ```
 
-32. Actually create the second VPC and AZ
+33. Actually create the second VPC and AZ
 
 ```
 $ terraform apply -auto-approve
 ```
 
-33. As a review, here are the files we created.
+34. In order to employ the subnets from the AZs we need to export their ID values from the child module.
+We also need the private route table for VPC peering.
+We export the NAT ami ID to use for a bastion host and internal server later on (even though
+they won't be actual NAT instances)
+
+```
+$ echo '
+  output public_subnet_id {
+    value = aws_subnet.public.id
+  }
+  output private_subnet_id {
+    value = aws_subnet.private.id
+  }
+  output private_route_table_id {
+    value = aws_route_table.private.id
+  }
+  output nat_ami_id {
+    value = data.aws_ami.nat_ami.id
+  }
+' >az/outputs.tf
+```
+
+35. We want to peer our two VPCs.  Here we create a new child module for peering and describe its variables
+
+```
+$ mkdir -p ./peering && echo '
+  variable requester_id {
+    type = string
+    description = "The id of the requester vpc"
+  }
+  variable requester_route_table_ids {
+    type = list(string)
+    description = "A list of route table ids to which the accepter CIDR block should be added"
+  }
+  variable accepter_id {
+    type = string
+    description = "The id of the accepter vpc"
+  }
+  variable accepter_route_table_ids {
+    type = list(string)
+    description = "A list of peer route table ids to which the requester CIDR block should be added"
+  }
+  variable tags {
+    type = map(string)
+    description = "General tags to apply to all resources"
+  }
+' >peering/vars.tf
+```
+
+36. Peering requires resources in two differnt VPCs.  Declare a provider for each
+(these will be passed from the root module)
+
+```
+$ echo '
+  provider aws {
+    alias = "requester"
+  }
+  provider aws {
+    alias = "accepter"
+  }
+' >peering/providers.tf
+```
+
+37. Use provider data sources to find extra info for peering.
+Notice that we use the two separate AWS providers - one for each VPC
+
+```
+$ echo '
+  data aws_vpc requester {
+    provider = aws.requester
+    id = var.requester_id
+  }
+  data aws_vpc accepter {
+    provider = aws.accepter
+    id = var.accepter_id
+  }
+  data aws_region accepter {
+    provider = aws.accepter
+  }
+  data aws_caller_identity accepter {
+    provider = aws.accepter
+  }
+' >peering/data.tf
+```
+
+38. Now we can declare the actual peering
+
+```
+$ echo '
+  resource aws_vpc_peering_connection requester {
+    provider = aws.requester
+    vpc_id = var.requester_id
+    peer_vpc_id = var.accepter_id
+    peer_region = data.aws_region.accepter.name
+    peer_owner_id = data.aws_caller_identity.accepter.account_id
+    auto_accept = false
+    tags = merge(var.tags, { 
+      Name = "workshop-peering"
+    })
+  }
+  resource aws_vpc_peering_connection_accepter accepter {
+    provider = aws.accepter
+    vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
+    auto_accept = true
+    tags = merge(var.tags, { 
+      Name = "workshop-peering"
+    })
+  }
+' >peering/resources.tf
+```
+
+39. Add routes between the peered VPCs
+Notice how we use the count mechanism to create more than one route at a time
+
+```
+$ echo '
+  resource aws_route vpc_routes {
+    count = length(var.requester_route_table_ids)
+    provider = aws.requester
+    route_table_id = var.requester_route_table_ids[count.index]
+    destination_cidr_block = data.aws_vpc.accepter.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
+  }
+  resource aws_route peer_routes {
+    count = length(var.accepter_route_table_ids)
+    provider = aws.accepter
+    route_table_id = var.accepter_route_table_ids[count.index]
+    destination_cidr_block = data.aws_vpc.requester.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
+  }
+' >>peering/resources.tf
+```
+
+40. In the root module, use the peering sub-module to actually establish peering
+
+```
+$ echo '
+  module peering_1_2 {
+    source                    = "./peering"
+    tags                      = var.tags
+    requester_id              = module.vpc_1.vpc_id
+    accepter_id               = module.vpc_2.vpc_id
+    requester_route_table_ids = [ 
+      module.vpc_1.public_route_table_id,
+      module.az_1.private_route_table_id
+    ]
+    accepter_route_table_ids  = [
+      module.vpc_2.public_route_table_id,
+      module.az_2.private_route_table_id
+    ]
+    providers                 = {
+      aws.requester = aws.aws_1
+      aws.accepter = aws.aws_2
+    }
+  }
+' >>modules.tf
+```
+
+41. Since we added a new sub-module we must re-run terraform init
+
+```
+$ terraform init
+```
+
+42. Actually apply the peering changes
+
+```
+$ terraform apply -auto-approve
+```
+
+43. We want to attach a key pair so that you can test connectivity to the bastion host and internal server
+
+```
+$ echo '
+  variable key_pair {
+    type = string
+    description = "The name of a key pair to attach to a bastion host and internal server for testing purposes"
+  }
+' >>vars.tf
+```
+
+44. Enter the name of the key pair you want to use (we can't provide it to you)
+
+```
+$ echo -n "Please enter the name of the key pair you wish to use: " &&
+read KEY_PAIR &&
+echo "
+  key_pair      = \"$KEY_PAIR\"
+" >>terraform.tfvars
+```
+
+45. The EC2 resources here are not re-usable, so we just put them in the root module
+We could use count here if we wanted a separate bastion for each VPC
+
+```
+$ echo '
+  resource aws_instance bastion {
+    provider                    = aws.aws_1
+    associate_public_ip_address = true
+    instance_type               = "t2.nano"
+    key_name                    = var.key_pair
+    ami                         = module.az_1.nat_ami_id
+    subnet_id                   = module.az_1.public_subnet_id
+    vpc_security_group_ids      = [ module.vpc_1.default_security_group_id ]
+    tags = merge(var.tags, { 
+      Name = "workshop-bastion"
+    })
+  }
+' >resources.tf
+```
+
+46. Since we have peered the VPCs we can access this internal server
+via the bastion in the other VPC
+
+```
+$ echo '
+  resource aws_instance server {
+    provider                    = aws.aws_2
+    instance_type               = "t2.nano"
+    key_name                    = var.key_pair
+    ami                         = module.az_2.nat_ami_id
+    subnet_id                   = module.az_2.private_subnet_id
+    vpc_security_group_ids      = [ module.vpc_2.default_security_group_id ]
+    tags = merge(var.tags, { 
+      Name = "workshop-server"
+    })
+  }
+' >>resources.tf
+```
+
+47. Apply the changes to create the servers
+
+```
+$ terraform apply -auto-approve
+```
+
+48. Here is an overview of the files we created.  They will remain after the workshop in case
+you want to review them.
 The terraform.tfstate* files are where Terraform tracks internal state so you should never
 modify or remove those files while you have active resources.
 
@@ -475,7 +719,7 @@ modify or remove those files while you have active resources.
 $ ls -lR
 ```
 
-34. Now that this workshop is done clean up after ourselves and destroy all the resources
+49. Now that this workshop is done clean up after ourselves and destroy all the resources
 
 ```
 $ terraform destroy -auto-approve
