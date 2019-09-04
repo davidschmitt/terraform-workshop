@@ -3,7 +3,7 @@
 #
 echo '
   module peering_1_2 {
-    source                    = "./az"
+    source                    = "./peering"
     tags                      = var.tags
     requester_id              = module.vpc_1.vpc_id
     accepter_id               = module.vpc_2.vpc_id

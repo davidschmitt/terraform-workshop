@@ -17,4 +17,4 @@ echo '
   output nat_ami_id {
     value = data.aws_ami.nat_ami.id
   }
-' >vpc/outputs.tf
+' >az/outputs.tf

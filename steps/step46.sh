@@ -1,4 +1,4 @@
 #
-# Now that this workshop is done clean up after ourselves and destroy all the resources
+# Apply the changes to create the servers
 #
-terraform destroy -auto-approve
+terraform apply -auto-approve

@@ -1,4 +1,4 @@
 #
-# Actually apply the peering changes
+# Since we added a new sub-module we must re-run terraform init
 #
-terraform apply -auto-approve
+terraform init

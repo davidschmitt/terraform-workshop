@@ -1,8 +1,17 @@
 #
-# Here is an overview of the files we created.  They will remain after the workshop in case
-# you want to review them.
+# Since we have peered the VPCs we can access this internal server
+# via the bastion in the other VPC
 #
-# The terraform.tfstate* files are where Terraform tracks internal state so you should never
-# modify or remove those files while you have active resources.
-#
-ls -lR
+echo '
+  resource aws_instance server {
+    provider                    = aws.aws_2
+    instance_type               = "t2.nano"
+    key_name                    = var.key_pair
+    ami                         = module.az_2.nat_ami_id
+    subnet_id                   = module.az_2.private_subnet_id
+    vpc_security_group_ids      = [ module.vpc_2.default_security_group_id ]
+    tags = merge(var.tags, { 
+      Name = "workshop-server"
+    })
+  }
+' >>resources.tf

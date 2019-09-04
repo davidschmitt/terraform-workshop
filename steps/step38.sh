@@ -13,7 +13,7 @@ echo '
   resource aws_route peer_routes {
     count = length(var.accepter_route_table_ids)
     provider = aws.accepter
-    route_table_id = var.accepter_route_Table_ids[count.index]
+    route_table_id = var.accepter_route_table_ids[count.index]
     destination_cidr_block = data.aws_vpc.requester.cidr_block
     vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
   }

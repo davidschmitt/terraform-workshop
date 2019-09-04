@@ -1,18 +1,9 @@
 #
-# The EC2 resources here are not re-usable, so we just put them in the root module
-# We could use count here if we wanted a separate bastion for each VPC
+# We want to attach a key pair so that you can test connectivity to the bastion host and internal server
 #
 echo '
-  resource aws_instance bastion {
-    provider                    = aws.aws_1
-    associate_public_ip_address = true
-    instance_type               = "t2.nano"
-    key_name                    = var.key_pair
-    ami                         = module.az_1.nat_ami_id
-    subnet_id                   = module.az_1.public_subnet_id
-    vpc_security_group_ids      = [ module.vpc_1.default_security_group_id ]
-    tags = merge(var.tags, { 
-      Name = "workshop-bastion"
-    })
+  variable key_pair {
+    type = string
+    description = "The name of a key pair to attach to a bastion host and internal server for testing purposes"
   }
-' >resources.tf
+' >>vars.tf
