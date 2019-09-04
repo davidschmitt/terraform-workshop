@@ -107,16 +107,13 @@ fi
 ################################################################################
 # Try to clean up if it has been run before
 ################################################################################
-if [ "$STEP" = "1" ]
+if [ "$STEP" = "1" -a -d "$WORKDIR" ]
 then
   clear
-  if [ -f "$WORKDIR/terraform.tfstate" ]
-  then
-    prompt "Attempting to clean up any left over resources.  Press ENTER to continue"
-    ( cd "$WORKDIR" && terraform destroy -auto-approve )
-  fi
-  prompt "Cleaning up any left over local files.  Press ENTER to continue"
-  rm -rf "$WORKDIR/"*.tf "$WORKDIR/"*.tfvars "$WORKDIR/az" "$WORKDIR/vpc"
+  prompt "Attempting to clean up any left over resources from prior runs.  Press ENTER to continue"
+  bash steps/cleanup.sh "$WORKDIR"
+  ok "Prior run cleanup"
+  prompt "Press ENTER to proceed to step 1"
 fi
 
 ################################################################################
