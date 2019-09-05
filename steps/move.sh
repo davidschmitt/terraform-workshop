@@ -29,16 +29,22 @@ then
   exit 1
 fi
 
+if [ "$RUN" '!=' 'true' ]
+then
+  echo "### Dry run: add -x option to actually run the commands listed below"
+fi
+
 if [ "$INSERT" '!=' "" ]
 then
   STEP="$MAX_STEP"
   while [ "$STEP" -ge "$INSERT" ]
   do
     NEXT=$(expr "$STEP" + 1)
-    echo git mv "step$STEP.sh" "step$NEXT.sh"
+    git ls-files --error-unmatch "step$STEP.sh" >/dev/null 2>&1 && MV="git mv" || MV="mv"
+    echo $MV "step$STEP.sh" "step$NEXT.sh"
     if [ "$RUN" = "true" ]
     then
-      git mv "step$STEP.sh" "step$NEXT.sh" || exit 1
+      $MV "step$STEP.sh" "step$NEXT.sh" || exit 1
     fi
     (( --STEP ))
   done
@@ -48,25 +54,36 @@ else
     STEP="$REMOVE"
     if [ -f "step$STEP.sh" ]
     then
-      echo git rm "step$STEP.sh"
+      git ls-files --error-unmatch "step$STEP.sh" >/dev/null 2>&1 && RM="git rm" || RM="rm"
+      echo $RM "step$STEP.sh"
       if [ "$RUN" = "true" ]
       then
-        git rm "step$STEP.sh" || exit 1
+        $RM "step$STEP.sh" || exit 1
       fi
     fi
     while [ "$STEP" -lt "$MAX_STEP" ]
     do
       NEXT=$(expr "$STEP" + 1)
-      echo git mv "step$NEXT.sh" "step$STEP.sh"
+      git ls-files --error-unmatch "step$NEXT.sh" >/dev/null 2>&1 && RM="git rm" || RM="rm"
+      echo $RM "step$NEXT.sh" "step$STEP.sh"
       if [ "$RUN" = "true" ]
       then
-        git mv "step$NEXT.sh" "step$STEP.sh" || exit 1
+        $RM "step$NEXT.sh" "step$STEP.sh" || exit 1
       fi
       (( ++STEP ))
     done
   else
-    echo "You must specify either -i or -r options"
+    echo "Usage:"
+    echo "move.sh -i N        - Dry run to insert a step number N"
+    echo "move.sh -i N -x     - Run commands to insert a step"
+    echo "move.sh -r N        - Dry run to remove a step"
+    echo "move.sh -r N -x     - Run commands to remove a step number N"
     exit 1
   fi
+fi
+
+if [ "$RUN" '!=' 'true' ]
+then
+  echo "### Dry run: add -x option to actually run the commands listed above"
 fi
 
