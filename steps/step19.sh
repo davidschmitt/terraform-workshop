@@ -4,6 +4,7 @@
 # subnet CIDR blocks.
 #
 echo '
+
   locals {
     region = data.aws_region.current.name
     azs = [
@@ -19,4 +20,5 @@ echo '
     offset = index(local.azs, var.az_name)
     cidr_block = data.aws_vpc.current.cidr_block
   }
+
 ' >az/locals.tf

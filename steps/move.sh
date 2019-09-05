@@ -64,7 +64,7 @@ else
     while [ "$STEP" -lt "$MAX_STEP" ]
     do
       NEXT=$(expr "$STEP" + 1)
-      git ls-files --error-unmatch "step$NEXT.sh" >/dev/null 2>&1 && RM="git rm" || RM="rm"
+      git ls-files --error-unmatch "step$NEXT.sh" >/dev/null 2>&1 && RM="git mv" || RM="rm"
       echo $RM "step$NEXT.sh" "step$STEP.sh"
       if [ "$RUN" = "true" ]
       then

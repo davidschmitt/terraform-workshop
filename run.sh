@@ -150,7 +150,7 @@ do
   then
     prompt "Press ENTER to proceed to step $STEP"
   else
-    prompt "Final step reahed. Press ENTER to exit"
+    prompt "Final step reached. Press ENTER to exit workshop"
     exit 0
   fi
 done

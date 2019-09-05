@@ -1,9 +1,17 @@
 #
-# We want to attach a key pair so that you can test connectivity to the bastion host and internal server
+# This code generates a key pair so we can test connectivity to the servers
+# It writes out the private key so we can use it to SSH into the bastion host
 #
 echo '
-  variable key_pair {
-    type = string
-    description = "The name of a key pair to attach to a bastion host and internal server for testing purposes"
+
+  resource tls_private_key keypair {
+    algorithm = "RSA"
+    rsa_bits  = 4096
   }
-' >>vars.tf
+
+  resource local_file private_key {
+    sensitive_content = tls_private_key.keypair.private_key_pem
+    filename = "${path.module}/private.pem"
+  }
+
+' >resources.tf

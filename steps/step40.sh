@@ -2,6 +2,7 @@
 # In the root module, use the peering sub-module to actually establish peering
 #
 echo '
+
   module peering_1_2 {
     source                    = "./peering"
     tags                      = var.tags
@@ -17,7 +18,8 @@ echo '
     ]
     providers                 = {
       aws.requester = aws.aws_1
-      aws.accepter = aws.aws_2
+      aws.accepter  = aws.aws_2
     }
   }
+
 ' >>modules.tf

@@ -2,6 +2,7 @@
 # Now we can declare the actual peering
 #
 echo '
+
   resource aws_vpc_peering_connection requester {
     provider = aws.requester
     vpc_id = var.requester_id
@@ -13,6 +14,7 @@ echo '
       Name = "workshop-peering"
     })
   }
+
   resource aws_vpc_peering_connection_accepter accepter {
     provider = aws.accepter
     vpc_peering_connection_id = aws_vpc_peering_connection.requester.id
@@ -21,4 +23,5 @@ echo '
       Name = "workshop-peering"
     })
   }
+
 ' >peering/resources.tf

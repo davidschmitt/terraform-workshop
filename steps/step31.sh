@@ -3,6 +3,7 @@
 # Notice how easy it is since child modules are reusable.
 #
 echo '
+
   module vpc_2 {
     source      = "./vpc"
     tags        = var.tags
@@ -11,6 +12,7 @@ echo '
       aws = aws.aws_2
     }
   }
+
   module az_2 {
     source                    = "./az"
     tags                      = var.tags
@@ -22,4 +24,5 @@ echo '
       aws = aws.aws_2
     }
   }
+
 ' >>modules.tf

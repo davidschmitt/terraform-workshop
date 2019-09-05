@@ -5,16 +5,21 @@
 # they won't be actual NAT instances)
 #
 echo '
+
   output public_subnet_id {
     value = aws_subnet.public.id
   }
+
   output private_subnet_id {
     value = aws_subnet.private.id
   }
+
   output private_route_table_id {
     value = aws_route_table.private.id
   }
+
   output nat_ami_id {
     value = data.aws_ami.nat_ami.id
   }
+
 ' >az/outputs.tf

@@ -2,6 +2,7 @@
 # We will need a NAT instance for our private subnet
 #
 echo '
+
   resource aws_instance nat {
     ami                         = data.aws_ami.nat_ami.id
     instance_type               = "t2.nano"
@@ -13,4 +14,5 @@ echo '
       Name = "workshop-${var.az_name}-nat"
     })
   }
+
 ' >>az/resources.tf

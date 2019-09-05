@@ -2,6 +2,7 @@
 # Add the az child module to our root module
 #
 echo '
+
   module az_1 {
     source                    = "./az"
     tags                      = var.tags
@@ -13,4 +14,5 @@ echo '
       aws = aws.aws_1
     }
   }
+
 ' >>modules.tf

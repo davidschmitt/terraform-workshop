@@ -3,6 +3,7 @@
 # Notice that the region is implied by the aws provider we pass
 #
 echo '
+
   module vpc_1 {
     source      = "./vpc"
     tags        = var.tags
@@ -11,4 +12,5 @@ echo '
       aws = aws.aws_1
     }
   }
+
 ' >modules.tf
