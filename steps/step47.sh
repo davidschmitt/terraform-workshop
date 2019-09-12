@@ -1,21 +1,19 @@
 #
-# Since Terraform knows the IP addresses of the EC2 instances, let's have it generate a helper script 
-# that lets us jump to the internal server via the bastion host.
-#
-# (Just ignore the SSH syntax ugliness right now)
+# Since we have peered the VPCs we can access this internal server
+# via the bastion in the other VPC
 #
 echo '
 
-  resource local_file jump {
-    content = join("\n", [
-      "#!/bin/bash",
-      "OPTS=\"-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null\"",
-      "PROXYCMD=\"ProxyCommand=ssh -i private.pem $OPTS -W %h:%p ec2-user@${aws_instance.bastion.public_ip}\"",
-      "SERVER=\"ec2-user@${aws_instance.server.private_ip}\"",
-      "ssh -i private.pem $OPTS -o \"$PROXYCMD\" \"$SERVER\"",
-      ""
-    ])
-    filename = "${path.module}/jump.sh"
+  resource aws_instance server {
+    provider                    = aws.aws_2
+    instance_type               = "t2.nano"
+    key_name                    = aws_key_pair.keypair2.key_name
+    ami                         = module.az_2.nat_ami_id
+    subnet_id                   = module.az_2.private_subnet_id
+    vpc_security_group_ids      = [ module.vpc_2.default_security_group_id ]
+    tags = merge(var.tags, { 
+      Name = "workshop-server"
+    })
   }
 
 ' >>resources.tf

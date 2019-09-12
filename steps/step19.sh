@@ -1,24 +1,22 @@
 #
-# Define local values to calculate an az_name offset.
-# That offset will be used to automatically calculate
-# subnet CIDR blocks.
+# In order to avoid extra variables for the user to populate 
+# we use the AWS provider data sources to find values for us
 #
 echo '
 
-  locals {
-    region = data.aws_region.current.name
-    azs = [
-      "${local.region}a",
-      "${local.region}b",
-      "${local.region}c",
-      "${local.region}d",
-      "${local.region}e",
-      "${local.region}f",
-      "${local.region}g",
-      "${local.region}h"
-    ]
-    offset = index(local.azs, var.az_name)
-    cidr_block = data.aws_vpc.current.cidr_block
+  data aws_region current { }
+
+  data aws_vpc current {
+    id = var.vpc_id
   }
 
-' >az/locals.tf
+  data aws_ami nat_ami {
+    most_recent = true
+    owners = ["amazon"]
+    filter {
+      name   = "name"
+      values = ["amzn-ami-vpc-nat-hvm-*-x86_64-ebs"]
+    }
+  }
+
+' >az/data.tf

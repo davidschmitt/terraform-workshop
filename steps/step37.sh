@@ -1,25 +1,15 @@
 #
-# Use provider data sources to find extra info for peering.
-# Notice that we use the two separate AWS providers - one for each VPC
+# Peering requires resources in two differnt VPCs.  Declare a provider for each
+# (these will be passed from the root module)
 #
 echo '
 
-  data aws_vpc requester {
-    provider = aws.requester
-    id = var.requester_id
+  provider aws {
+    alias = "requester"
   }
 
-  data aws_vpc accepter {
-    provider = aws.accepter
-    id = var.accepter_id
+  provider aws {
+    alias = "accepter"
   }
 
-  data aws_region accepter {
-    provider = aws.accepter
-  }
-
-  data aws_caller_identity accepter {
-    provider = aws.accepter
-  }
-
-' >peering/data.tf
+' >peering/providers.tf

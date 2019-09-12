@@ -1,20 +1,18 @@
 #
-# Define a route table for the private subnet to use
-# with a default route via the NAT instance
+# We will need a NAT instance for our private subnet
 #
 echo '
 
-  resource aws_route_table private {
-    vpc_id  = var.vpc_id
-    tags    = merge(var.tags, {
-      Name = "workshop-${var.az_name}-private-route-table"
+  resource aws_instance nat {
+    ami                         = data.aws_ami.nat_ami.id
+    instance_type               = "t2.nano"
+    subnet_id                   = aws_subnet.public.id
+    associate_public_ip_address = true
+    vpc_security_group_ids      = [ var.default_security_group_id ]
+    source_dest_check           = false
+    tags                        = merge(var.tags, { 
+      Name = "workshop-${var.az_name}-nat"
     })
-  }
-
-  resource aws_route private {
-    destination_cidr_block  = "0.0.0.0/0"
-    route_table_id          = aws_route_table.private.id
-    instance_id             = aws_instance.nat.id
   }
 
 ' >>az/resources.tf

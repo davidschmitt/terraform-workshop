@@ -1,20 +1,17 @@
 #
-# Once the keypair is created we need to register it with AWS so we can use it 
-# during EC2 creation.  We use unique key names in case 
-# aws_1 and aws_2 are in the same region.
+# This code generates a key pair so we can test connectivity to the servers
+# It writes out the private key so we can use it to SSH into the bastion host
 #
 echo '
 
-  resource aws_key_pair keypair1 {
-    provider = aws.aws_1
-    key_name   = "workshop-keypair-1"
-    public_key = tls_private_key.keypair.public_key_openssh
+  resource tls_private_key keypair {
+    algorithm = "RSA"
+    rsa_bits  = 4096
   }
 
-  resource aws_key_pair keypair2 {
-    provider = aws.aws_2
-    key_name   = "workshop-keypair-2"
-    public_key = tls_private_key.keypair.public_key_openssh
+  resource local_file private_key {
+    sensitive_content = tls_private_key.keypair.private_key_pem
+    filename = "${path.module}/private.pem"
   }
 
-' >>resources.tf
+' >resources.tf

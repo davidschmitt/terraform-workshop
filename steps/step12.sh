@@ -1,5 +1,5 @@
 #
-# Actually apply the configuration to create an empty VPC
-# The -auto-approve flag avoids the need for you to type 'yes<ENTER>'
+# The "plan" operation performs a dry-run so you can see what will happen once you apply
+# your changes in the next step.
 #
-terraform apply -auto-approve
+terraform plan

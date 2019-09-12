@@ -1,4 +1,4 @@
 #
-# Apply the changes to create the servers
+# Since we referenced the new TLS provider we must re-run init
 #
-terraform apply -auto-approve
+terraform init

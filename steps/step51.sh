@@ -1,8 +1,9 @@
 #
-# Here is an overview of the files we created.  They will remain after the workshop in case
-# you want to review them.
+# Use that jump script Terraform created for us to jump to the private server
 #
-# The terraform.tfstate* files are where Terraform tracks internal state so you should never
-# modify or remove those files while you have active resources.
+# Notice this proves our VPC peering is working since the Bastion host is
+# in VPC 1 and the private server is in VPC 2!
 #
-ls -lR
+# Log out of the private server (e.g. "exit") to continue the workshop.
+#
+bash jump.sh

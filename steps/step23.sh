@@ -1,4 +1,4 @@
 #
-# Go ahead and create the public subnet
+# Since we have added a new child module we must re-run terraform init
 #
-terraform apply -auto-approve
+terraform init

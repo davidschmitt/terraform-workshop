@@ -1,20 +1,20 @@
 #
-# The EC2 resources here are not re-usable, so we just put them in the root module
-# We could use count here if we wanted a separate bastion for each VPC
+# Once the keypair is created we need to register it with AWS so we can use it 
+# during EC2 creation.  We use unique key names in case 
+# aws_1 and aws_2 are in the same region.
 #
 echo '
 
-  resource aws_instance bastion {
-    provider                    = aws.aws_1
-    associate_public_ip_address = true
-    instance_type               = "t2.nano"
-    key_name                    = aws_key_pair.keypair1.key_name
-    ami                         = module.az_1.nat_ami_id
-    subnet_id                   = module.az_1.public_subnet_id
-    vpc_security_group_ids      = [ module.vpc_1.default_security_group_id ]
-    tags = merge(var.tags, { 
-      Name = "workshop-bastion"
-    })
+  resource aws_key_pair keypair1 {
+    provider = aws.aws_1
+    key_name   = "workshop-keypair-1"
+    public_key = tls_private_key.keypair.public_key_openssh
+  }
+
+  resource aws_key_pair keypair2 {
+    provider = aws.aws_2
+    key_name   = "workshop-keypair-2"
+    public_key = tls_private_key.keypair.public_key_openssh
   }
 
 ' >>resources.tf
