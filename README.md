@@ -1,6 +1,16 @@
 # terraform-workshop
 
-Demonstrate key features of Terraforms by incrementally moving from hello world VPC to fully usable public/private subnets in AWS.
+Demonstrate key features of Terraforms by incrementally moving from "hello world" AWS VPC to fully usable 
+public and private subnets peered across multiple AWS regions (plus a couple of demo EC2 instances).
+
+Key goals are:
+
+* Incrementally building a Terraform configuration step-by-step  
+* Explanations of each what each step does and why  
+* Periodic “apply” to demonstrate incremental provisioning  
+* Examples of best practices for structuring Terraform modules  
+* Exploring the most commonly used parts of Terraform syntax  
+* A final result that can be used for future reference 
 
 # To initiate a live demo:
 
